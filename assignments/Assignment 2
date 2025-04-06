@@ -1,0 +1,148 @@
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  SectionList,
+  TouchableOpacity,
+  Modal,
+  StyleSheet
+} from 'react-native';
+
+const contacts = [
+  { name: 'Eman', number: '1234567890', group: 'Family' },
+  { name: 'Warda', number: '2345678901', group: 'Family' },
+  { name: 'Zariya', number: '3456789012', group: 'Family' },
+  { name: 'Mirall', number: '4567890123', group: 'Friends' },
+  { name: 'Jia', number: '5678901234', group: 'Friends' },
+  { name: 'Naima', number: '6789012345', group: 'Friends' },
+  { name: 'Mahnoor', number: '7890123456', group: 'Friends' },
+  { name: 'Anum', number: '8901234567', group: 'Work' },
+  { name: 'Manahil', number: '9012345678', group: 'Work' },
+  { name: 'Humaira', number: '0123456789', group: 'Work' },
+];
+
+const groupContacts = (contactsList) => {
+  const groups = ['Family', 'Friends', 'Work'];
+  return groups.map(group => ({
+    title: group,
+    data: contactsList.filter(c => c.group === group)
+  })).filter(section => section.data.length > 0);
+};
+
+export default function App() {
+  const [search, setSearch] = useState('');
+  const [selectedContact, setSelectedContact] = useState(null);
+
+  const filteredContacts = contacts.filter(contact =>
+    contact.name.toLowerCase().includes(search.toLowerCase()) ||
+    contact.number.includes(search)
+  );
+
+  const groupedData = groupContacts(filteredContacts);
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.header}>Contact Manager</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Search by name or number"
+        value={search}
+        onChangeText={setSearch}
+      />
+      <SectionList
+        sections={groupedData}
+        keyExtractor={(item, index) => item.name + index}
+        renderItem={({ item }) => (
+          <TouchableOpacity onPress={() => setSelectedContact(item)}>
+            <Text style={styles.item}>{item.name} - {item.number}</Text>
+          </TouchableOpacity>
+        )}
+        renderSectionHeader={({ section: { title } }) => (
+          <Text style={styles.sectionHeader}>{title}</Text>
+        )}
+      />
+
+      <Modal visible={!!selectedContact} transparent={true} animationType="slide">
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            {selectedContact && (
+              <>
+                <Text style={styles.modalTitle}>{selectedContact.name}</Text>
+                <Text>Number: {selectedContact.number}</Text>
+                <Text>Group: {selectedContact.group}</Text>
+                <TouchableOpacity
+                  style={styles.closeButton}
+                  onPress={() => setSelectedContact(null)}>
+                  <Text style={{ color: '#fff' }}>Close</Text>
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
+        </View>
+      </Modal>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingTop: 60,
+    paddingHorizontal: 20,
+    backgroundColor: '#e0f7fa' // Light teal background
+  },
+  header: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    textAlign: 'center',
+    color: '#00796b'
+  },
+  input: {
+    height: 40,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    marginBottom: 20,
+    backgroundColor: '#ffffff'
+  },
+  sectionHeader: {
+    fontWeight: 'bold',
+    fontSize: 18,
+    backgroundColor: '#b2dfdb',
+    padding: 5
+  },
+  item: {
+    padding: 10,
+    fontSize: 16,
+    borderBottomColor: '#ccc',
+    borderBottomWidth: 1,
+    backgroundColor: '#ffffff'
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 10,
+    width: '80%',
+    alignItems: 'center'
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 10
+  },
+  closeButton: {
+    marginTop: 20,
+    backgroundColor: '#007AFF',
+    padding: 10,
+    borderRadius: 8
+  }
+});
